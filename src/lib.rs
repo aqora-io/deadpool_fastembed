@@ -4,6 +4,7 @@ use deadpool::managed;
 mod config;
 
 pub use config::Config;
+pub use fastembed::{EmbeddingModel, ImageEmbeddingModel, RerankerModel, SparseModel};
 
 /// [`Manager`] for creating and recycling fastembed.
 ///
