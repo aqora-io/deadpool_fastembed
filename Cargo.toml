@@ -1,0 +1,37 @@
+[package]
+name = "deadpool_fastembed"
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.87"
+authors = ["Angel Dijoux <angel@aqora.io>"]
+description = "Dead simple async pool for fastembed"
+keywords = ["async", "fastembed", "pool"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/aqora-io/deadpool_fastembed"
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+
+[dependencies]
+deadpool = { version = "0.12.2", default-features = false, features = [
+  "managed",
+] }
+fastembed = "5.0.2"
+serde = { package = "serde", version = "1.0", features = [
+  "derive",
+], optional = true }
+
+[features]
+serde = ["deadpool/serde", "dep:serde"]
+
+# Re-export of fastembed features
+hf-hub = ["fastembed/hf-hub"]
+hf-hub-native-tls = ["fastembed/hf-hub-native-tls"]
+hf-hub-rustls-tls = ["fastembed/hf-hub-rustls-tls"]
+ort-download-binaries = ["fastembed/ort-download-binaries"]
+ort-load-dynamic = ["fastembed/ort-load-dynamic"]
+optimum-cli = ["fastembed/optimum-cli"]
+online = ["fastembed/online"]
