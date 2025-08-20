@@ -418,7 +418,6 @@ checksum = "5ed5957ff93768adf7a65ab167a17835c3d2c3c50d084fe305174c112f468e2f"
 dependencies = [
  "deadpool-runtime",
  "num_cpus",
- "serde",
  "tokio",
 ]
 
@@ -434,7 +433,6 @@ version = "0.0.1"
 dependencies = [
  "deadpool",
  "fastembed",
- "serde",
 ]
 
 [[package]]
@@ -600,9 +598,9 @@ dependencies = [
 
 [[package]]
 name = "fastembed"
-version = "5.0.2"
+version = "5.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e80f1228af29d72b85f2be510aba2d98cf4f214f9b4994db42af6965bc88d74a"
+checksum = "7b6ea4eee3e41add51440698fdde1b4afe83241e73fa90c29462a0460d69bcec"
 dependencies = [
  "anyhow",
  "hf-hub",
@@ -1273,7 +1271,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "07033963ba89ebaf1584d767badaa2e8fcec21aedea6b8c0346d487d49c28667"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.6",
+ "windows-targets 0.53.3",
 ]
 
 [[package]]
@@ -1838,7 +1836,7 @@ dependencies = [
  "once_cell",
  "socket2 0.5.10",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

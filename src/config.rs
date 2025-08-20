@@ -1,107 +1,71 @@
-use std::path::PathBuf;
-
-use deadpool::{
-    Runtime,
-    managed::{CreatePoolError, Pool, PoolBuilder, PoolConfig},
-};
+use crate::{CreatePoolError, Pool, PoolBuilder, PoolConfig, Runtime};
 use fastembed::{
-    EmbeddingModel, ExecutionProviderDispatch, ImageEmbedding, ImageEmbeddingModel,
-    ImageInitOptions, InitOptions, RerankInitOptions, RerankerModel, SparseInitOptions,
-    SparseModel, SparseTextEmbedding, TextEmbedding, TextRerank,
+    EmbeddingModel, ImageEmbedding, ImageEmbeddingModel, ImageInitOptions, RerankInitOptions,
+    RerankerModel, SparseInitOptions, SparseModel, SparseTextEmbedding, TextEmbedding,
+    TextInitOptions, TextRerank,
 };
 
 #[derive(Debug, Clone)]
 pub enum ModelKind {
-    Text(EmbeddingModel),
-    Image(ImageEmbeddingModel),
-    Sparse(SparseModel),
-    ReRanking(RerankerModel),
+    Text(TextInitOptions),
+    Image(ImageInitOptions),
+    Sparse(SparseInitOptions),
+    Rerank(RerankInitOptions),
 }
 
 impl Default for ModelKind {
     fn default() -> Self {
-        Self::Text(EmbeddingModel::BGESmallENV15)
+        Self::text(EmbeddingModel::default())
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct FastembedConfig {
-    pub model: ModelKind,
-    pub execution_providers: Vec<ExecutionProviderDispatch>,
-    pub max_length: usize,
-    pub cache_dir: PathBuf,
-    pub show_download_progress: bool,
-}
+impl ModelKind {
+    pub fn text(model: EmbeddingModel) -> Self {
+        Self::Text(TextInitOptions::new(model))
+    }
 
-impl FastembedConfig {
-    pub fn new(model: ModelKind) -> Self {
-        Self {
-            model,
-            show_download_progress: false,
-            ..Default::default()
-        }
+    pub fn image(model: ImageEmbeddingModel) -> Self {
+        Self::Image(ImageInitOptions::new(model))
+    }
+
+    pub fn sparse(model: SparseModel) -> Self {
+        Self::Sparse(SparseInitOptions::new(model))
+    }
+
+    pub fn rerank(model: RerankerModel) -> Self {
+        Self::Rerank(RerankInitOptions::new(model))
     }
 }
 
-pub enum Embedding {
+pub enum EmbeddingKind {
     Text(TextEmbedding),
     Image(ImageEmbedding),
     Sparse(SparseTextEmbedding),
     ReRanking(TextRerank),
 }
 
-impl Embedding {
-    /// from a given [`FastembedConfig`] init the right embedding defined in fastembed
-    pub fn try_new(config: FastembedConfig) -> Result<Self, fastembed::Error> {
-        Ok(match config.model {
-            ModelKind::Text(model) => Self::Text(TextEmbedding::try_new(
-                InitOptions::new(model)
-                    .with_max_length(config.max_length)
-                    .with_cache_dir(config.cache_dir)
-                    .with_execution_providers(config.execution_providers)
-                    .with_show_download_progress(config.show_download_progress),
-            )?),
-            ModelKind::Image(embedding) => Self::Image(ImageEmbedding::try_new(
-                ImageInitOptions::new(embedding)
-                    .with_cache_dir(config.cache_dir.clone())
-                    .with_execution_providers(config.execution_providers)
-                    .with_show_download_progress(config.show_download_progress),
-            )?),
-            ModelKind::Sparse(embedding) => Self::Sparse(SparseTextEmbedding::try_new(
-                SparseInitOptions::new(embedding)
-                    .with_max_length(config.max_length)
-                    .with_cache_dir(config.cache_dir)
-                    .with_execution_providers(config.execution_providers)
-                    .with_show_download_progress(config.show_download_progress),
-            )?),
-            ModelKind::ReRanking(embedding) => Self::ReRanking(TextRerank::try_new(
-                RerankInitOptions::new(embedding)
-                    .with_max_length(config.max_length)
-                    .with_cache_dir(config.cache_dir.clone())
-                    .with_execution_providers(config.execution_providers)
-                    .with_show_download_progress(config.show_download_progress),
-            )?),
+impl EmbeddingKind {
+    pub fn try_new(model: &ModelKind) -> Result<Self, fastembed::Error> {
+        Ok(match model.to_owned() {
+            ModelKind::Text(opts) => Self::Text(TextEmbedding::try_new(opts)?),
+            ModelKind::Image(opts) => Self::Image(ImageEmbedding::try_new(opts)?),
+            ModelKind::Sparse(opts) => Self::Sparse(SparseTextEmbedding::try_new(opts)?),
+            ModelKind::Rerank(opts) => Self::ReRanking(TextRerank::try_new(opts)?),
         })
     }
 }
 
 /// Configuration object.
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(crate = "serde"))]
 pub struct Config {
-    /// All fastembed options when init a embedding
-    pub fastembed_config: FastembedConfig,
+    pub model: ModelKind,
 
     /// [`Pool`] configuration.
     pub pool: Option<PoolConfig>,
 }
 
 impl Config {
-    pub fn create_pool(
-        &self,
-        runtime: Option<Runtime>,
-    ) -> Result<Pool<crate::Manager>, CreatePoolError<ConfigError>> {
+    pub fn create_pool(&self, runtime: Option<Runtime>) -> Result<Pool, CreatePoolError> {
         let mut builder = self.builder().map_err(CreatePoolError::Config)?;
         if let Some(runtime) = runtime {
             builder = builder.runtime(runtime);
@@ -109,8 +73,8 @@ impl Config {
         builder.build().map_err(CreatePoolError::Build)
     }
 
-    pub fn builder(&self) -> Result<PoolBuilder<crate::Manager>, ConfigError> {
-        let manager = crate::Manager::new(self.fastembed_config.clone());
+    pub fn builder(&self) -> Result<PoolBuilder, ConfigError> {
+        let manager = crate::Manager::new(self.model.clone());
         Ok(Pool::builder(manager).config(self.get_pool_config()))
     }
 
@@ -122,15 +86,7 @@ impl Config {
     #[must_use]
     pub fn from_model(model: impl Into<ModelKind>) -> Self {
         Self {
-            fastembed_config: FastembedConfig::new(model.into()),
-            pool: None,
-        }
-    }
-
-    #[must_use]
-    pub fn from_config(config: impl Into<FastembedConfig>) -> Self {
-        Self {
-            fastembed_config: config.into(),
+            model: model.into(),
             pool: None,
         }
     }

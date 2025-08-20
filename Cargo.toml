@@ -10,6 +10,10 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/aqora-io/deadpool_fastembed"
 readme = "README.md"
 
+[lib]
+name = "deadpool_fastembed"
+path = "src/lib.rs"
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
@@ -19,11 +23,10 @@ rustdoc-args = ["--cfg", "docsrs"]
 deadpool = { version = "0.12.2", default-features = false, features = [
   "managed",
 ] }
-fastembed = "5.0"
+fastembed = "5.1.0"
 
 
 [features]
-serde = ["deadpool/serde", "dep:serde"]
 
 # Re-export of fastembed features
 hf-hub = ["fastembed/hf-hub"]
