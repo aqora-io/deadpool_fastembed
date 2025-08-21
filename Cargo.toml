@@ -27,6 +27,9 @@ fastembed = "5.1.0"
 
 
 [features]
+default = ["rt_tokio_1"]
+rt_tokio_1 = ["deadpool/rt_tokio_1"]
+rt_async-std_1 = ["deadpool/rt_async-std_1"]
 
 # Re-export of fastembed features
 hf-hub = ["fastembed/hf-hub"]
