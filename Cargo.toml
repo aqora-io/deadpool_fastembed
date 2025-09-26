@@ -2,7 +2,7 @@
 name = "deadpool_fastembed"
 version = "0.0.1"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.89"
 authors = ["Angel Dijoux <angel@aqora.io>"]
 description = "Dead simple async pool for fastembed"
 keywords = ["async", "fastembed", "pool"]
