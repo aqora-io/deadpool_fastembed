@@ -23,7 +23,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 deadpool = { version = "0.12.2", default-features = false, features = [
   "managed",
 ] }
-fastembed = { version = "5.2.0", default-features = false }
+fastembed = { version = "5.5.0", default-features = false }
 
 
 [features]
@@ -35,6 +35,7 @@ rt_async-std_1 = ["deadpool/rt_async-std_1"]
 hf-hub = ["fastembed/hf-hub"]
 hf-hub-native-tls = ["fastembed/hf-hub-native-tls"]
 hf-hub-rustls-tls = ["fastembed/hf-hub-rustls-tls"]
+image-models = ["fastembed/image-models"]
 ort-download-binaries = ["fastembed/ort-download-binaries"]
 ort-load-dynamic = ["fastembed/ort-load-dynamic"]
 optimum-cli = ["fastembed/optimum-cli"]

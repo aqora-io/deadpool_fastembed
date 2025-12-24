@@ -2,7 +2,7 @@
 
 Deadpool is a dead simple async pool for connections and objects of any type.
 
-This crate implements a [`deadpool`](https://crates.io/crates/deadpool) manager for [`fastembed`]((<https://crates.io/crates/fastembed>).
+This crate implements a [`deadpool`](https://crates.io/crates/deadpool) manager for [`fastembed`](https://crates.io/crates/fastembed).
 
 ## Features
 
@@ -13,6 +13,7 @@ This crate implements a [`deadpool`](https://crates.io/crates/deadpool) manager 
 | `hf-hub`                | Enable support for loading models from Hugging Face Hub                     | `fastembed/hf-hub`                | no      |
 | `hf-hub-native-tls`     | Hugging Face Hub with [native-tls](https://crates.io/crates/native-tls)     | `fastembed/hf-hub-native-tls`     | no      |
 | `hf-hub-rustls-tls`     | Hugging Face Hub with [rustls](https://crates.io/crates/rustls) TLS backend | `fastembed/hf-hub-rustls-tls`     | no      |
+| `image-models`          | Fastembed with image models enabled                                         | `fastembed/image-models`          | no      |
 | `ort-download-binaries` | Automatically download ONNX Runtime binaries                                | `fastembed/ort-download-binaries` | no      |
 | `ort-load-dynamic`      | Dynamically load ONNX Runtime library at runtime                            | `fastembed/ort-load-dynamic`      | no      |
 | `optimum-cli`           | Enable compatibility with Hugging Face Optimum CLI                          | `fastembed/optimum-cli`           | no      |

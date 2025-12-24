@@ -3,8 +3,12 @@ use fastembed::Error as FastembedError;
 
 mod config;
 
+#[cfg(not(feature = "hf-hub"))]
+use crate::config::UserDefinedModelKind;
 use config::ConfigError;
-pub use config::{Config, EmbeddingKind, ModelKind};
+#[cfg(feature = "hf-hub")]
+pub use config::ModelKind;
+pub use config::{Config, EmbeddingKind};
 pub use deadpool::managed::reexports::*;
 
 deadpool::managed_reexports!("fastembed", Manager, Embedding, FastembedError, ConfigError);
@@ -41,6 +45,8 @@ impl Embedding {
             None
         }
     }
+
+    #[cfg(feature = "image-models")]
     pub fn as_image_mut(&mut self) -> Option<&mut fastembed::ImageEmbedding> {
         if let EmbeddingKind::Image(te) = &mut **self {
             Some(te)
@@ -69,11 +75,20 @@ impl Embedding {
 /// [`Manager`]: managed::Manager
 #[derive(Debug)]
 pub struct Manager {
+    #[cfg(feature = "hf-hub")]
     model: ModelKind,
+    #[cfg(not(feature = "hf-hub"))]
+    model: UserDefinedModelKind,
 }
 
 impl Manager {
+    #[cfg(feature = "hf-hub")]
     pub fn new(model: ModelKind) -> Self {
+        Self { model }
+    }
+
+    #[cfg(not(feature = "hf-hub"))]
+    pub fn new(model: UserDefinedModelKind) -> Self {
         Self { model }
     }
 }
@@ -82,8 +97,14 @@ impl managed::Manager for Manager {
     type Type = EmbeddingKind;
     type Error = fastembed::Error;
 
+    #[cfg(feature = "hf-hub")]
     async fn create(&self) -> Result<Self::Type, Self::Error> {
         EmbeddingKind::try_new(&self.model)
+    }
+
+    #[cfg(not(feature = "hf-hub"))]
+    async fn create(&self) -> Result<Self::Type, Self::Error> {
+        EmbeddingKind::try_new_from_user_defined(&self.model)
     }
 
     async fn recycle(&self, _: &mut Self::Type, _: &managed::Metrics) -> RecycleResult {
