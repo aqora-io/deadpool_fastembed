@@ -20,7 +20,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 
 [dependencies]
-deadpool = { version = "0.12.2", default-features = false, features = [
+deadpool = { version = "0.12.3", default-features = false, features = [
   "managed",
 ] }
 fastembed = { version = "5.5.0", default-features = false }
