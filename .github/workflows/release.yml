@@ -5,13 +5,25 @@ on:
   workflow_dispatch:
 
 env:
+  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CARGO_TERM_COLOR: always
+
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: "checkout"
         uses: actions/checkout@v4
+
+      - name: "Cache Cargo"
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - uses: actions/setup-node@v6
         with:
