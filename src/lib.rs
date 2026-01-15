@@ -4,7 +4,9 @@ use fastembed::Error as FastembedError;
 mod config;
 
 #[cfg(not(feature = "hf-hub"))]
-use crate::config::UserDefinedModelKind;
+pub use crate::config::UserDefinedModelKind;
+#[cfg(all(feature = "hf-hub", feature = "qwen3"))]
+pub use candle_core::{DType, Device};
 use config::ConfigError;
 #[cfg(feature = "hf-hub")]
 pub use config::ModelKind;
@@ -63,6 +65,14 @@ impl Embedding {
     }
     pub fn as_reranker_mut(&mut self) -> Option<&mut fastembed::TextRerank> {
         if let EmbeddingKind::ReRanking(te) = &mut **self {
+            Some(te)
+        } else {
+            None
+        }
+    }
+    #[cfg(all(feature = "hf-hub", feature = "qwen3"))]
+    pub fn as_qwen3_mut(&mut self) -> Option<&mut fastembed::Qwen3TextEmbedding> {
+        if let EmbeddingKind::Qwen3(te) = &mut **self {
             Some(te)
         } else {
             None

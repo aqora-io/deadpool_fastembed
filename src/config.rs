@@ -16,6 +16,12 @@ use fastembed::{
     TextInitOptions,
 };
 
+#[cfg(all(feature = "hf-hub", feature = "qwen3"))]
+mod qwen3 {
+    pub(crate) use candle_core::{DType, Device};
+    pub(crate) use fastembed::Qwen3TextEmbedding;
+}
+
 #[derive(Debug, Clone)]
 #[cfg(feature = "hf-hub")]
 pub enum ModelKind {
@@ -24,6 +30,13 @@ pub enum ModelKind {
     Image(ImageInitOptions),
     Sparse(SparseInitOptions),
     Rerank(RerankInitOptions),
+    #[cfg(feature = "qwen3")]
+    Qwen3 {
+        repo_id: String,
+        device: qwen3::Device,
+        dtype: qwen3::DType,
+        max_length: usize,
+    },
 }
 
 #[cfg(feature = "hf-hub")]
@@ -98,6 +111,8 @@ pub enum EmbeddingKind {
     Image(ImageEmbedding),
     Sparse(SparseTextEmbedding),
     ReRanking(TextRerank),
+    #[cfg(all(feature = "hf-hub", feature = "qwen3"))]
+    Qwen3(qwen3::Qwen3TextEmbedding),
 }
 
 impl EmbeddingKind {
@@ -109,6 +124,18 @@ impl EmbeddingKind {
             ModelKind::Image(opts) => Self::Image(ImageEmbedding::try_new(opts)?),
             ModelKind::Sparse(opts) => Self::Sparse(SparseTextEmbedding::try_new(opts)?),
             ModelKind::Rerank(opts) => Self::ReRanking(TextRerank::try_new(opts)?),
+            #[cfg(feature = "qwen3")]
+            ModelKind::Qwen3 {
+                repo_id,
+                device,
+                dtype,
+                max_length,
+            } => Self::Qwen3(qwen3::Qwen3TextEmbedding::from_hf(
+                repo_id.as_str(),
+                &device,
+                dtype,
+                max_length,
+            )?),
         })
     }
 

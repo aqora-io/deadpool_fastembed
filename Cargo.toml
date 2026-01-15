@@ -23,8 +23,9 @@ rustdoc-args = ["--cfg", "docsrs"]
 deadpool = { version = "0.12.3", default-features = false, features = [
   "managed",
 ] }
-fastembed = { version = "5.5.0", default-features = false }
-
+fastembed = { version = "5.8", default-features = false }
+candle-core = { version = "0.9", default-features = false, optional = true }
+candle-nn = { version = "0.9", default-features = false, optional = true }
 
 [features]
 default = ["rt_tokio_1"]
@@ -40,3 +41,14 @@ ort-download-binaries = ["fastembed/ort-download-binaries"]
 ort-load-dynamic = ["fastembed/ort-load-dynamic"]
 optimum-cli = ["fastembed/optimum-cli"]
 online = ["fastembed/online"]
+
+qwen3 = ["fastembed/qwen3", "candle-core", "candle-nn"]
+accelerate = [
+  "fastembed/qwen3",
+  "candle-core/accelerate",
+  "candle-nn/accelerate",
+]
+mkl = ["fastembed/qwen3", "candle-core/mkl", "candle-nn/mkl"]
+cuda = ["fastembed/qwen3", "candle-core/cuda", "candle-nn/cuda"]
+cudnn = ["fastembed/qwen3", "candle-core/cudnn", "candle-nn/cudnn", "cuda"]
+metal = ["fastembed/qwen3", "candle-core/metal", "candle-nn/metal"]
