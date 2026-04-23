@@ -5,16 +5,16 @@ use fastembed::{
 };
 
 #[cfg(feature = "image-models")]
-use fastembed::{
-    ImageEmbedding, ImageEmbeddingModel, ImageInitOptions, ImageInitOptionsUserDefined,
-    UserDefinedImageEmbeddingModel,
-};
+use fastembed::{ImageEmbedding, ImageInitOptionsUserDefined, UserDefinedImageEmbeddingModel};
 
 #[cfg(feature = "hf-hub")]
 use fastembed::{
     EmbeddingModel, RerankInitOptions, RerankerModel, SparseInitOptions, SparseModel,
     TextInitOptions,
 };
+
+#[cfg(all(feature = "hf-hub", feature = "image-models"))]
+use fastembed::{ImageEmbeddingModel, ImageInitOptions};
 
 #[cfg(all(feature = "hf-hub", feature = "qwen3"))]
 mod qwen3 {

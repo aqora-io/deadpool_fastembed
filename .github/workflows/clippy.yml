@@ -1,0 +1,71 @@
+name: Clippy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  no-default:
+    name: clippy (no-default-features)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --no-default-features --all-targets -- -D warnings
+
+  individual:
+    name: clippy (${{ matrix.feature }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        feature:
+          - rt_tokio_1
+          - rt_async-std_1
+          - hf-hub
+          - hf-hub-native-tls
+          - hf-hub-rustls-tls
+          - image-models
+          - nomic-v2-moe
+          - ort-download-binaries
+          - ort-download-binaries-native-tls
+          - ort-download-binaries-rustls-tls
+          - ort-load-dynamic
+          - optimum-cli
+          - online
+          - qwen3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --no-default-features --features ${{ matrix.feature }} --all-targets -- -D warnings
+
+  powerset:
+    name: clippy (${{ matrix.runtime }} + ${{ matrix.tls }} + others)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - rt_tokio_1
+          - rt_async-std_1
+        tls:
+          - hf-hub-native-tls
+          - hf-hub-rustls-tls
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy --no-default-features --features "${{ matrix.runtime }},${{ matrix.tls }},hf-hub,image-models,nomic-v2-moe,ort-download-binaries,ort-load-dynamic,optimum-cli,online,qwen3" --all-targets -- -D warnings
